@@ -124,16 +124,18 @@ func nambahMotor(arr *ArrMotor) {
 	)
 	kembali = "yes"
 	for i := 0; i <= len(arr) && kembali == "yes"; i++ {
-		fmt.Print("Tahun pabrikan : ")
-		fmt.Scanln(&arr[i].tahunPabrikan)
-		fmt.Print("Merek : ")
-		fmt.Scanln(&arr[i].merek)
-		fmt.Print("Jenis motor : ")
-		fmt.Scanln(&arr[i].jenisMotor)
-		fmt.Print("Stok tersedia : ")
-		fmt.Scanln(&arr[i].stokTersedia)
-		fmt.Println("Apakah kembali ke menu? ")
-		fmt.Scanln(&kembali)
+		if arr[i].tahunPabrikan == 0 && arr[i].merek == "" && arr[i].jenisMotor == "" && arr[i].stokTersedia == 0 {
+			fmt.Print("Tahun pabrikan : ")
+			fmt.Scanln(&arr[i].tahunPabrikan)
+			fmt.Print("Merek : ")
+			fmt.Scanln(&arr[i].merek)
+			fmt.Print("Jenis motor : ")
+			fmt.Scanln(&arr[i].jenisMotor)
+			fmt.Print("Stok tersedia : ")
+			fmt.Scanln(&arr[i].stokTersedia)
+			fmt.Println("Apakah kembali ke menu? ")
+			fmt.Scanln(&kembali)
+		}
 	}
 }
 
@@ -141,14 +143,16 @@ func tambahSparePart(arr *ArrSparepart) {
 	var kembali string
 	kembali = "yes"
 	for i := 0; i < len(arr) && kembali == "yes"; i++ {
-		fmt.Println("Silahkan masukan spare-part yang ingin ditambahkan: ")
-		fmt.Scan(&arr[i].nama)
-		fmt.Println("Silahkan masukan harga: ")
-		fmt.Scan(&arr[i].harga)
-		fmt.Println("Silahkan masukan Stok yang tersedia: ")
-		fmt.Scan(&arr[i].stokTersedia)
-		fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
-		fmt.Scan(&kembali)
+		if arr[i].nama == "" && arr[i].harga == 0 && arr[i].stokTersedia == 0 {
+			fmt.Println("Silahkan masukan spare-part yang ingin ditambahkan: ")
+			fmt.Scan(&arr[i].nama)
+			fmt.Println("Silahkan masukan harga: ")
+			fmt.Scan(&arr[i].harga)
+			fmt.Println("Silahkan masukan Stok yang tersedia: ")
+			fmt.Scan(&arr[i].stokTersedia)
+			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
+			fmt.Scan(&kembali)
+		}
 	}
 
 }
