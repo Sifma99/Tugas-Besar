@@ -74,6 +74,8 @@ func main() {
 					nambahMotor(&dataMotor)
 				}
 
+			} else {
+				fmt.Println("Maaf input tidak valid. Kembali ke menu utama.")
 			}
 
 		} else if pilihan == "3" {
@@ -83,7 +85,11 @@ func main() {
 				listSparePart(dataSparepart)
 			} else if pilihan == "2" {
 				listMotor(dataMotor)
+			} else {
+				fmt.Println("Maaf input tidak valid. Kembali ke menu utama.")
 			}
+		} else {
+			fmt.Println("Maaf input tidak valid. Kembali ke menu utama.")
 		}
 		fmt.Print("Kembali ke menu? (Yes/No): ")
 		fmt.Scan(&choiceMenu)
