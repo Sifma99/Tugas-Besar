@@ -41,7 +41,10 @@ type motor struct {
 	stokTersedia  int
 }
 
+// ArrSparepart Tipe untuk menampung Array tipe bentukan Sparepart.
 type ArrSparepart [100]sparePart
+
+// ArrMotor Tipe untuk menampung Array tipe bentukan motor.
 type ArrMotor [100]motor
 
 var dataMotor ArrMotor
@@ -66,14 +69,20 @@ func main() {
 					fmt.Print("Data yang diedit: ")
 					fmt.Scan(&indeksData)
 					editSparePart(indeksData, &dataSparepart)
+				} else {
+					fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 				}
 			} else if pilihan == "2" {
 				menuTambahEdit()
 				fmt.Scan(&pilihan)
 				if pilihan == "1" {
 					nambahMotor(&dataMotor)
+				} else {
+					fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 				}
 
+			} else {
+				fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 			}
 
 		} else if pilihan == "3" {
@@ -83,7 +92,11 @@ func main() {
 				listSparePart(dataSparepart)
 			} else if pilihan == "2" {
 				listMotor(dataMotor)
+			} else {
+				fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 			}
+		} else {
+			fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 		}
 		fmt.Print("Kembali ke menu? (Yes/No): ")
 		fmt.Scan(&choiceMenu)
@@ -154,7 +167,6 @@ func tambahSparePart(arr *ArrSparepart) {
 			fmt.Scan(&kembali)
 		}
 	}
-
 }
 
 func editSparePart(n int, arr *ArrSparepart) {
@@ -166,6 +178,47 @@ func editSparePart(n int, arr *ArrSparepart) {
 	fmt.Scan(&arr[n].stokTersedia)
 }
 
+// sortSparePartHarga sorting dari harga terkecil ke harga terbesar.
+func sortSparePartHarga(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
+	var j int
+	var temp int
+	for i := 0; i < nArr; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if arr[j].harga < arr[temp].harga {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
+
+}
+
+// Misalkan Data sudah di sort
+func searchSparePart(arr ArrSparepart, key string, nArr int) bool {
+	var awal, tengah, akhir int
+	var ketemu bool
+	awal = 0
+	akhir = nArr - 1
+	tengah = (awal + akhir) / 2
+	ketemu = false
+	for awal < akhir && arr[tengah].nama != key {
+		if arr[tengah].nama > key {
+			akhir = tengah - 1
+		} else {
+			awal = tengah + 1
+		}
+		tengah = (awal + akhir) / 2
+	}
+	if arr[tengah].nama == key {
+		ketemu = true
+	}
+	return ketemu
+}
 func menuUtama() {
 	fmt.Println("Selamat datang di bengkel onlen")
 	fmt.Println("Silahkan pilih menu: ")
