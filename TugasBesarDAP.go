@@ -1,13 +1,11 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
+import "strings"
 
 type pelanggan struct {
 	nama         string
 	specMotor    motor
-	dataWaktu    history
 	jumTransaksi int
 }
 
@@ -19,6 +17,7 @@ type transaksi struct {
 	pembeli      pelanggan
 	arrService   []service
 	arrSparePart []sparePart
+	dataWaktu    history
 	totalHarga   int
 }
 
@@ -47,12 +46,34 @@ type ArrSparepart [100]sparePart
 // ArrMotor Tipe untuk menampung Array tipe bentukan motor.
 type ArrMotor [100]motor
 
+type ArrPelanggan [100]pelanggan
+
 var dataMotor ArrMotor
 var dataSparepart ArrSparepart
+var dataPelanggan ArrPelanggan
 
 func main() {
-	var indeksData int
+	var indeksData, countArr int
 	var pilihan, choiceMenu string
+	dataMotor[0].jenisMotor = "Beat"
+	dataMotor[0].merek = "Yamaha"
+	dataMotor[0].stokTersedia = 2
+	dataMotor[0].tahunPabrikan = 2019
+	dataMotor[1].jenisMotor = "CBR"
+	dataMotor[1].merek = "Honda"
+	dataMotor[1].stokTersedia = 1
+	dataMotor[1].tahunPabrikan = 2001
+	dataSparepart[0].nama = "Rem"
+	dataSparepart[0].harga = 45000
+	dataSparepart[0].stokTersedia = 2
+	dataSparepart[1].nama = "Ban"
+	dataSparepart[1].harga = 394000
+	dataSparepart[1].stokTersedia = 1
+	dataPelanggan[0].nama = "Rusep"
+	dataPelanggan[0].specMotor.merek = "Yamaha"
+	dataPelanggan[0].specMotor.jenisMotor = "cbr"
+	dataPelanggan[0].specMotor.tahunPabrikan = 2018
+	countArr = 2
 	choiceMenu = "Yes"
 	for choiceMenu == "Yes" || choiceMenu == "yes" {
 		menuUtama()
@@ -64,7 +85,7 @@ func main() {
 				menuTambahEdit()
 				fmt.Scan(&pilihan)
 				if pilihan == "1" {
-					tambahSparePart(&dataSparepart)
+					tambahSparePart(&dataSparepart, &countArr)
 				} else if pilihan == "2" {
 					fmt.Print("Data yang diedit: ")
 					fmt.Scan(&indeksData)
@@ -80,20 +101,34 @@ func main() {
 				} else {
 					fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
 				}
-
-			} else {
-				fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
+			} else if pilihan == "3" {
+				menuTambahEdit()
+				fmt.Scan(&pilihan)
+				if pilihan == "1" {
+					tambahPelanggan(&dataPelanggan, &countArr)
+				}
 			}
 
 		} else if pilihan == "3" {
 			menuJenisData()
 			fmt.Scan(&pilihan)
 			if pilihan == "1" {
-				listSparePart(dataSparepart)
+				menuSortingSpareBy()
+				fmt.Scan(&pilihan)
+				if pilihan == "1" {
+					sortSparePartNama(dataSparepart, countArr, &dataSparepart)
+					listSparePart(dataSparepart)
+				} else if pilihan == "2" {
+					sortSparePartHarga(dataSparepart, countArr, &dataSparepart)
+					listSparePart(dataSparepart)
+				} else if pilihan == "3" {
+					sortSparePartStok(dataSparepart, countArr, &dataSparepart)
+					listSparePart(dataSparepart)
+				}
 			} else if pilihan == "2" {
 				listMotor(dataMotor)
-			} else {
-				fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
+			} else if pilihan == "3" {
+				listPelanggan(dataPelanggan, countArr)
 			}
 		} else {
 			fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
@@ -126,7 +161,6 @@ func listSparePart(arr ArrSparepart) {
 			fmt.Printf("Harga: %d \n", arr[i].harga)
 			fmt.Printf("Stok: %d \n", arr[i].stokTersedia)
 		}
-
 	}
 
 }
@@ -152,7 +186,7 @@ func nambahMotor(arr *ArrMotor) {
 	}
 }
 
-func tambahSparePart(arr *ArrSparepart) {
+func tambahSparePart(arr *ArrSparepart, nArr *int) {
 	var kembali string
 	kembali = "yes"
 	for i := 0; i < len(arr) && kembali == "yes"; i++ {
@@ -166,6 +200,7 @@ func tambahSparePart(arr *ArrSparepart) {
 			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
 		}
+		*nArr = *nArr + 1
 	}
 }
 
@@ -195,7 +230,38 @@ func sortSparePartHarga(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
 		(*arrOut)[i] = arr[i]
 		(*arrOut)[temp] = arr[temp]
 	}
+}
 
+func sortSparePartStok(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
+	var temp, j int
+	for i := 0; i < nArr; i++ {
+		temp = arr[i].stokTersedia
+		j = i
+		for j > 0 && arr[j-1].stokTersedia > temp {
+			arr[j].stokTersedia = arr[j-1].stokTersedia
+			j--
+		}
+		arr[j].stokTersedia = temp
+	}
+	*arrOut = arr
+}
+
+func sortSparePartNama(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
+	var j int
+	var temp int
+	for i := 0; i < nArr; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if strings.ToLower(arr[j].nama) < strings.ToLower(arr[temp].nama) {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
 }
 
 // Misalkan Data sudah di sort
@@ -219,6 +285,38 @@ func searchSparePart(arr ArrSparepart, key string, nArr int) bool {
 	}
 	return ketemu
 }
+
+func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
+	var kembali string
+	kembali = "yes"
+	for i := 0; i < len(arr) && kembali == "yes"; i++ {
+		if arr[i].nama == "" {
+			fmt.Println("Silahkan masukan nama pelanggan: ")
+			fmt.Scan(&arr[i].nama)
+			fmt.Println("Silahkan masukan Spesifikasi Motor ")
+			fmt.Println("Silahkan masukan merek motor: ")
+			fmt.Scan(&arr[i].specMotor.merek)
+			fmt.Println("Silahkan masukan Tahun Pabrikan Motor: ")
+			fmt.Scan(&arr[i].specMotor.tahunPabrikan)
+			fmt.Println("Silahkan masukan Jenis motor: ")
+			fmt.Scan(&arr[i].specMotor.jenisMotor)
+			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
+			fmt.Scan(&kembali)
+		}
+		*nArr = *nArr + 1
+	}
+}
+
+func listPelanggan(arr ArrPelanggan, nArr int) {
+	for i := 0; i < nArr; i++ {
+		if arr[i].nama != "" {
+			fmt.Printf("Nama: %s \n", arr[i].nama)
+			fmt.Printf("Merek Motor: %s \n", arr[i].specMotor.merek)
+			fmt.Printf("Jenis Motor: %s \n", arr[i].specMotor.jenisMotor)
+			fmt.Printf("Tahun Pabrikan Motor: %d \n", arr[i].specMotor.tahunPabrikan)
+		}
+	}
+}
 func menuUtama() {
 	fmt.Println("Selamat datang di bengkel onlen")
 	fmt.Println("Silahkan pilih menu: ")
@@ -232,6 +330,7 @@ func menuJenisData() {
 	fmt.Println("Silahkan pilih jenis data: ")
 	fmt.Println("1. Spare-part")
 	fmt.Println("2. Motor")
+	fmt.Println("3. Pelanggan")
 	fmt.Print("Pilihan: ")
 }
 
@@ -239,6 +338,14 @@ func menuTambahEdit() {
 	fmt.Println("Silahkan pilih Edit / Tambah data: ")
 	fmt.Println("1. Tambah")
 	fmt.Println("2. Edit")
+	fmt.Print("Pilihan: ")
+}
+
+func menuSortingSpareBy() {
+	fmt.Println("Silahkan pilih Sorting berdasarkan: ")
+	fmt.Println("1. Nama")
+	fmt.Println("2. Harga")
+	fmt.Println("3. Stok")
 	fmt.Print("Pilihan: ")
 
 }
