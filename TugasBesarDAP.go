@@ -46,6 +46,7 @@ type ArrSparepart [100]sparePart
 // ArrMotor Tipe untuk menampung Array tipe bentukan motor.
 type ArrMotor [100]motor
 
+// ArrPelanggan Tipe untuk menampung array tipe bentukan pelanggan.
 type ArrPelanggan [100]pelanggan
 
 var dataMotor ArrMotor
@@ -53,92 +54,55 @@ var dataSparepart ArrSparepart
 var dataPelanggan ArrPelanggan
 
 func main() {
-	var indeksData, countArr int
+	var countArrSparepart, countArrPelanggan, countArrMotor int
 	var pilihan, choiceMenu string
-	dataMotor[0].jenisMotor = "Beat"
-	dataMotor[0].merek = "Yamaha"
-	dataMotor[0].stokTersedia = 2
-	dataMotor[0].tahunPabrikan = 2019
-	dataMotor[1].jenisMotor = "CBR"
-	dataMotor[1].merek = "Honda"
-	dataMotor[1].stokTersedia = 1
-	dataMotor[1].tahunPabrikan = 2001
-	dataSparepart[0].nama = "Rem"
-	dataSparepart[0].harga = 45000
-	dataSparepart[0].stokTersedia = 2
-	dataSparepart[1].nama = "Ban"
-	dataSparepart[1].harga = 394000
-	dataSparepart[1].stokTersedia = 1
-	dataPelanggan[0].nama = "Rusep"
-	dataPelanggan[0].specMotor.merek = "Yamaha"
-	dataPelanggan[0].specMotor.jenisMotor = "cbr"
-	dataPelanggan[0].specMotor.tahunPabrikan = 2018
-	countArr = 2
 	choiceMenu = "Yes"
-	for choiceMenu == "Yes" || choiceMenu == "yes" {
+	for strings.ToLower(choiceMenu) == "yes" {
 		menuUtama()
-		fmt.Scan(&pilihan)
-		if pilihan == "1" {
-			menuJenisData()
+		switch pilihan {
+		case "1":
+			menuTambahEdit()
 			fmt.Scan(&pilihan)
-			if pilihan == "1" {
-				menuTambahEdit()
+			switch pilihan {
+			case "1":
+				menuJenisData()
 				fmt.Scan(&pilihan)
-				if pilihan == "1" {
-					tambahSparePart(&dataSparepart, &countArr)
-				} else if pilihan == "2" {
-					fmt.Print("Data yang diedit: ")
-					fmt.Scan(&indeksData)
-					editSparePart(indeksData, &dataSparepart)
-				} else {
-					fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
+				switch pilihan {
+				case "1":
+					tambahSparePart(&dataSparepart, &countArrSparepart)
+				case "2":
+					nambahMotor(&dataMotor, &countArrMotor)
+				case "3":
+					tambahPelanggan(&dataPelanggan, &countArrPelanggan)
 				}
-			} else if pilihan == "2" {
-				menuTambahEdit()
-				fmt.Scan(&pilihan)
-				if pilihan == "1" {
-					nambahMotor(&dataMotor)
-				} else {
-					fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
-				}
-			} else if pilihan == "3" {
-				menuTambahEdit()
-				fmt.Scan(&pilihan)
-				if pilihan == "1" {
-					tambahPelanggan(&dataPelanggan, &countArr)
-				}
+			case "2":
+			case "3":
 			}
-
-		} else if pilihan == "3" {
+		case "2":
+		case "3":
 			menuJenisData()
 			fmt.Scan(&pilihan)
-			if pilihan == "1" {
+			switch pilihan {
+			case "1":
 				menuSortingSpareBy()
 				fmt.Scan(&pilihan)
-				if pilihan == "1" {
-					sortSparePartNama(dataSparepart, countArr, &dataSparepart)
-					listSparePart(dataSparepart)
-				} else if pilihan == "2" {
-					sortSparePartHarga(dataSparepart, countArr, &dataSparepart)
-					listSparePart(dataSparepart)
-				} else if pilihan == "3" {
-					sortSparePartStok(dataSparepart, countArr, &dataSparepart)
-					listSparePart(dataSparepart)
+				switch pilihan {
+				case "1":
+					sortSparePartNama(dataSparepart, countArrSparepart, &dataSparepart)
+				case "2":
+					sortSparePartHarga(dataSparepart, countArrSparepart, &dataSparepart)
+				case "3":
+					sortSparePartStok(dataSparepart, countArrSparepart, &dataSparepart)
 				}
-			} else if pilihan == "2" {
-				listMotor(dataMotor)
-			} else if pilihan == "3" {
-				listPelanggan(dataPelanggan, countArr)
+				listSparePart(dataSparepart)
 			}
-		} else {
-			fmt.Println("Maaf input tidak valid, Kembali ke menu utama.")
+
 		}
-		fmt.Print("Kembali ke menu? (Yes/No): ")
+		fmt.Println("Kembali ke menu ? (Yes / No): ")
 		fmt.Scan(&choiceMenu)
-		for choiceMenu != "No" && choiceMenu != "no" && choiceMenu != "Yes" && choiceMenu != "yes" {
+		for strings.ToLower(choiceMenu) != "no" && strings.ToLower(choiceMenu) != "yes" {
 			fmt.Println("Maaf input anda tidak valid, silahkan masukkan (Yes) atau (No)")
 			fmt.Scan(&choiceMenu)
-
 		}
 	}
 }
@@ -162,10 +126,9 @@ func listSparePart(arr ArrSparepart) {
 			fmt.Printf("Stok: %d \n", arr[i].stokTersedia)
 		}
 	}
-
 }
 
-func nambahMotor(arr *ArrMotor) {
+func nambahMotor(arr *ArrMotor, nArr *int) {
 	var (
 		kembali string
 	)
@@ -173,15 +136,16 @@ func nambahMotor(arr *ArrMotor) {
 	for i := 0; i <= len(arr) && kembali == "yes"; i++ {
 		if arr[i].tahunPabrikan == 0 && arr[i].merek == "" && arr[i].jenisMotor == "" && arr[i].stokTersedia == 0 {
 			fmt.Print("Tahun pabrikan : ")
-			fmt.Scanln(&arr[i].tahunPabrikan)
+			fmt.Scan(&arr[i].tahunPabrikan)
 			fmt.Print("Merek : ")
-			fmt.Scanln(&arr[i].merek)
+			fmt.Scan(&arr[i].merek)
 			fmt.Print("Jenis motor : ")
-			fmt.Scanln(&arr[i].jenisMotor)
+			fmt.Scan(&arr[i].jenisMotor)
 			fmt.Print("Stok tersedia : ")
-			fmt.Scanln(&arr[i].stokTersedia)
+			fmt.Scan(&arr[i].stokTersedia)
 			fmt.Println("Apakah kembali ke menu? ")
-			fmt.Scanln(&kembali)
+			fmt.Scan(&kembali)
+			*nArr = *nArr + 1
 		}
 	}
 }
@@ -289,8 +253,9 @@ func searchSparePart(arr ArrSparepart, key string, nArr int) bool {
 func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 	var kembali string
 	kembali = "yes"
-	for i := 0; i < len(arr) && kembali == "yes"; i++ {
+	for i := 0; i < *nArr && kembali == "yes"; i++ {
 		if arr[i].nama == "" {
+			fmt.Println("=================================================")
 			fmt.Println("Silahkan masukan nama pelanggan: ")
 			fmt.Scan(&arr[i].nama)
 			fmt.Println("Silahkan masukan Spesifikasi Motor ")
@@ -310,6 +275,7 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 func listPelanggan(arr ArrPelanggan, nArr int) {
 	for i := 0; i < nArr; i++ {
 		if arr[i].nama != "" {
+			fmt.Println("========================================")
 			fmt.Printf("Nama: %s \n", arr[i].nama)
 			fmt.Printf("Merek Motor: %s \n", arr[i].specMotor.merek)
 			fmt.Printf("Jenis Motor: %s \n", arr[i].specMotor.jenisMotor)
