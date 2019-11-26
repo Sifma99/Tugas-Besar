@@ -1,5 +1,5 @@
 # Tugas-Besar Dasar Algoritma Pemrograman
-
+The main purpose of this apps is solely for fulfilling the final task of Basic Algorithm and Programming courses.
 # Service Apps
 This apps is used to help motorcycles service. The main data used are Spare parts, Transaction history, and Customer Data.
 User of this application are motorcycle service officers.
