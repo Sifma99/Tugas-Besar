@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Pelanggan Tipe bentukan pelanggan yang berisi nama, specMotor, jumTransaksi.
 type Pelanggan struct {
@@ -66,7 +68,7 @@ var dataService ArrService
 
 func main() {
 	var countArrSparepart, countArrPelanggan, countArrMotor, indeksSearch, idxSpare int
-	var pilihan, choiceMenu, spareDicari, pelangganDicari string
+	var pilihan, choiceMenu, spareDicari, motorDicari, pelangganDicari string
 	choiceMenu = "Yes"
 	for strings.ToLower(choiceMenu) == "yes" {
 		menuUtama()
@@ -101,11 +103,18 @@ func main() {
 						editSparePart(dataSparepart, indeksSearch, &dataSparepart)
 					} else {
 						fmt.Printf("Maaf tidak terdapat %s.", spareDicari)
+						fmt.Println("")
 					}
 				case "2":
 					fmt.Print("Motor yang ingin diedit: ")
-					//fmt.Scan(&motorDicari)
-					//indeksSearch = searchMotor
+					fmt.Scan(&motorDicari)
+					indeksSearch = searchMotor(dataMotor, motorDicari, countArrMotor)
+					if indeksSearch != -1 {
+						editMotor(dataMotor, indeksSearch, &dataMotor)
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s.", spareDicari)
+						fmt.Println("")
+					}
 				case "3":
 					fmt.Print("Pelanggan yang ingin diedit: ")
 					fmt.Scanln(&pelangganDicari)
@@ -146,9 +155,21 @@ func main() {
 				}
 				listSparePart(dataSparepart)
 			case "2":
-				//menuSortingMotorBy
+				menuSortingMotorBy()
+				fmt.Scan(&pilihan)
+				switch pilihan {
+				case "1":
+					sortMotorMerek(dataMotor, countArrMotor, &dataMotor)
+				case "2":
+					sortMotorTahun(dataMotor, countArrMotor, &dataMotor)
+				case "3":
+					sortSparePartStok(dataSparepart, countArrSparepart, &dataSparepart)
+				default:
+					fmt.Println("Maaf pilihan tidak valid.")
+				}
+				listMotor(dataMotor)
 			case "3":
-				//menuSortingPelanggan
+				//menuSortingPelangganx
 			default:
 				fmt.Println("Maaf pilihan tidak valid.")
 			}
@@ -182,6 +203,7 @@ func nambahMotor(arr *ArrMotor, nArr *int) {
 			fmt.Println("Apakah kembali ke menu? ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
+			// fmt.Println(arr)
 		}
 	}
 }
@@ -253,6 +275,18 @@ func editService(arr ArrService, n int, arrOut *ArrService) {
 	(*arrOut)[n] = arr[n]
 }
 
+func editMotor(arr ArrMotor, n int, arrOut *ArrMotor) {
+	fmt.Print("Silahkan masukan tahun: ")
+	fmt.Scan(&arr[n].tahunPabrikan)
+	fmt.Print("Silahkan masukan merek motor: ")
+	fmt.Scan(&arr[n].merek)
+	fmt.Print("Silahkan masukan jenis motor: ")
+	fmt.Scan(&arr[n].jenisMotor)
+	fmt.Print("Silahkan masukan Stok yang tersedia: ")
+	fmt.Scan(&arr[n].stokTersedia)
+	(*arrOut)[n] = arr[n]
+}
+
 func editSparePart(arr ArrSparepart, n int, arrOut *ArrSparepart) {
 	fmt.Print("Silahkan masukan nama spare-part: ")
 	fmt.Scan(&arr[n].nama)
@@ -296,6 +330,40 @@ func deleteSparepart(arr ArrSparepart, indeks int, arrOut *ArrSparepart) {
 	arr[indeks].nama = ""
 	arr[indeks].stokTersedia = 0
 	(*arrOut)[indeks] = arr[indeks]
+}
+
+// sortMotor sorting dari harga terkecil ke harga terbesar.
+func sortMotorMerek(arr ArrMotor, nArr int, arrOut *ArrMotor) {
+	for i := 0; i < nArr; i++ {
+		for j := i + 1; j > 0 && strings.ToLower(arr[j].merek) < strings.ToLower(arr[j-1].merek); j-- {
+			temp := arr[j-1]
+			arr[j-1] = arr[j]
+			arr[j] = temp
+		}
+	}
+	*arrOut = arr
+}
+
+func sortMotorTahun(arr ArrMotor, nArr int, arrOut *ArrMotor) {
+	for i := 0; i < nArr; i++ {
+		for j := i + 1; j > 0 && arr[j].tahunPabrikan < arr[j-1].tahunPabrikan; j-- {
+			temp := arr[j-1]
+			arr[j-1] = arr[j]
+			arr[j] = temp
+		}
+	}
+	*arrOut = arr
+}
+
+func sortMotorStok(arr ArrMotor, nArr int, arrOut *ArrMotor) {
+	for i := 0; i < nArr; i++ {
+		for j := i + 1; j > 0 && arr[j].stokTersedia < arr[j-1].stokTersedia; j-- {
+			temp := arr[j-1]
+			arr[j-1] = arr[j]
+			arr[j] = temp
+		}
+	}
+	*arrOut = arr
 }
 
 // sortSparePartHarga sorting dari harga terkecil ke harga terbesar.
@@ -360,6 +428,25 @@ func searchPelanggan(arr ArrPelanggan, key string, nArr int) int {
 		}
 	}
 	return indeks
+}
+
+func searchMotor(arr ArrMotor, key string, nArr int) int {
+	var awal, tengah, akhir int
+	awal = 0
+	akhir = nArr - 1
+	tengah = (awal + akhir) / 2
+	for awal < akhir && arr[tengah].merek != key {
+		if arr[tengah].merek > key {
+			akhir = tengah - 1
+		} else {
+			awal = tengah + 1
+		}
+		tengah = (awal + akhir) / 2
+	}
+	if arr[tengah].merek == key {
+		return tengah
+	}
+	return -1
 }
 
 // Misalkan Data sudah di sort
@@ -445,6 +532,15 @@ func menuSortingSpareBy() {
 	fmt.Println("Silahkan pilih Sorting berdasarkan: ")
 	fmt.Println("1. Nama")
 	fmt.Println("2. Harga")
+	fmt.Println("3. Stok")
+	fmt.Print("Pilihan: ")
+
+}
+
+func menuSortingMotorBy() {
+	fmt.Println("Silahkan pilih Sorting berdasarkan: ")
+	fmt.Println("1. Merek")
+	fmt.Println("2. Tahun")
 	fmt.Println("3. Stok")
 	fmt.Print("Pilihan: ")
 
