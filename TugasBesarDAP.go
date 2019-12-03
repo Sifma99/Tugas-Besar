@@ -10,6 +10,8 @@ type Pelanggan struct {
 	nama         string
 	specMotor    Motor
 	jumTransaksi []Transaksi
+	countTrans   int
+	totalHarga   int
 }
 
 // Service Tipe bentukan service yang berisi nama, hargaService.
@@ -61,14 +63,16 @@ type ArrPelanggan [IsiArray]Pelanggan
 // ArrService Tipe untuk menampung array tipe bentukan Service.
 type ArrService [IsiArray]Service
 
-var dataMotor ArrMotor
-var dataSparepart ArrSparepart
-var dataPelanggan ArrPelanggan
-var dataService ArrService
-
 func main() {
-	var countArrSparepart, countArrPelanggan, countArrMotor, indeksSearch, idxSpare int
-	var pilihan, choiceMenu, spareDicari, motorDicari, pelangganDicari string
+	var countArrSparepart, countArrPelanggan, countArrMotor, countArrService int
+	var idxSpare, idxMotor, idxPelanggan, idxService int
+	var pilihan, choiceMenu, spareDicari, motorDicari, pelangganDicari, serviceDicari string
+	var dataMotor ArrMotor
+	var dataSparepart ArrSparepart
+	var dataPelanggan ArrPelanggan
+	var dataService ArrService
+
+	//var pendapatanTotal int
 	choiceMenu = "Yes"
 	for strings.ToLower(choiceMenu) == "yes" {
 		menuUtama()
@@ -88,6 +92,8 @@ func main() {
 					nambahMotor(&dataMotor, &countArrMotor)
 				case "3":
 					tambahPelanggan(&dataPelanggan, &countArrPelanggan)
+				case "4":
+					tambahService(&dataService, &countArrService)
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
@@ -98,9 +104,9 @@ func main() {
 				case "1":
 					fmt.Print("Sparepart yang ingin diedit: ")
 					fmt.Scan(&spareDicari)
-					indeksSearch = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
-					if indeksSearch != -1 {
-						editSparePart(dataSparepart, indeksSearch, &dataSparepart)
+					idxSpare = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
+					if idxSpare != -1 {
+						editSparePart(dataSparepart, idxSpare, &dataSparepart)
 					} else {
 						fmt.Printf("Maaf tidak terdapat %s.", spareDicari)
 						fmt.Println("")
@@ -108,17 +114,30 @@ func main() {
 				case "2":
 					fmt.Print("Motor yang ingin diedit: ")
 					fmt.Scan(&motorDicari)
-					indeksSearch = searchMotor(dataMotor, motorDicari, countArrMotor)
-					if indeksSearch != -1 {
-						editMotor(dataMotor, indeksSearch, &dataMotor)
+					idxMotor = searchMotor(dataMotor, motorDicari, countArrMotor)
+					if idxMotor != -1 {
+						editMotor(dataMotor, idxMotor, &dataMotor)
 					} else {
-						fmt.Printf("Maaf tidak terdapat %s.", spareDicari)
-						fmt.Println("")
+						fmt.Printf("Maaf tidak terdapat %s.\n", motorDicari)
 					}
 				case "3":
 					fmt.Print("Pelanggan yang ingin diedit: ")
-					fmt.Scanln(&pelangganDicari)
-					indeksSearch = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
+					fmt.Scan(&pelangganDicari)
+					idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
+					if idxPelanggan != -1 {
+						editPelanggan(dataPelanggan, idxPelanggan, &dataPelanggan)
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s. \n", pelangganDicari)
+					}
+				case "4":
+					fmt.Print("Jenis service yang ingin diedit: ")
+					fmt.Scan(&serviceDicari)
+					idxService = searchService(dataService, serviceDicari, countArrService)
+					if idxService != -1 {
+						editService(dataService, idxSpare, &dataService)
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s. \n", serviceDicari)
+					}
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
@@ -127,15 +146,66 @@ func main() {
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
-					fmt.Print("Data yang ingin dihapus: ")
+					fmt.Print("Sparepart yang ingin dihapus: ")
 					fmt.Scan(&spareDicari)
 					idxSpare = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
-					deleteSparepart(dataSparepart, idxSpare, &dataSparepart)
+					if idxSpare != -1 {
+						deleteSparepart(dataSparepart, idxSpare, &dataSparepart)
+					}
+				case "2":
+					fmt.Print("Motor yang ingin dihapus: ")
+					fmt.Scan(&motorDicari)
+					idxMotor = searchMotor(dataMotor, motorDicari, countArrMotor)
+					if idxMotor != -1 {
+						deleteMotor(dataMotor, idxMotor, &dataMotor)
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s. \n", motorDicari)
+					}
+				case "3":
+					fmt.Print("Pelanggan yang ingin dihapus: ")
+					fmt.Scan(&pelangganDicari)
+					idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
+					if idxPelanggan != -1 {
+						deletePelanggan(dataPelanggan, idxPelanggan, &dataPelanggan)
+					} else {
+						fmt.Printf("Maaf idak terdapat %s.\n", pelangganDicari)
+					}
+				case "4":
+					fmt.Print("Service yang ingin dihapus: ")
+					fmt.Scan(&serviceDicari)
+					idxService = searchService(dataService, serviceDicari, countArrService)
+					if idxService != -1 {
+						deleteService(dataService, idxService, &dataService)
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s. \n", serviceDicari)
+					}
 				}
 			default:
 				fmt.Println("Maaf pilihan tidak valid.")
 			}
 		case "2":
+			menuTransaksi()
+			fmt.Scan(&pilihan)
+			fmt.Println("Silahkan masukan nama pelanggan: ")
+			fmt.Scan(&pelangganDicari)
+			idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
+			if idxPelanggan != 1 {
+				switch pilihan {
+				case "1":
+					fmt.Println("Silahkan masukkan jenis service yang ingin dilakukan: ")
+					sortServiceHarga(dataService, countArrService, &dataService)
+					listService(dataService, countArrService)
+					fmt.Print("Pilihan: ")
+					fmt.Scan(&serviceDicari)
+					idxService = searchService(dataService, serviceDicari, countArrService)
+					if idxService != -1 {
+						tambahTransService(&dataPelanggan, dataService, idxService, idxPelanggan)
+					}
+				}
+			} else {
+				fmt.Printf("Maaf tidak terdapat %s. \n", pelangganDicari)
+			}
+
 		case "3":
 			menuJenisData()
 			fmt.Scan(&pilihan)
@@ -153,7 +223,7 @@ func main() {
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
-				listSparePart(dataSparepart)
+				listSparePart(dataSparepart, countArrSparepart)
 			case "2":
 				menuSortingMotorBy()
 				fmt.Scan(&pilihan)
@@ -163,13 +233,31 @@ func main() {
 				case "2":
 					sortMotorTahun(dataMotor, countArrMotor, &dataMotor)
 				case "3":
-					sortSparePartStok(dataSparepart, countArrSparepart, &dataSparepart)
+					sortMotorStok(dataMotor, countArrMotor, &dataMotor)
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
-				listMotor(dataMotor)
+				listMotor(dataMotor, countArrMotor)
 			case "3":
-				//menuSortingPelangganx
+				menuSortingPelangganBy()
+				fmt.Scan(&pilihan)
+				switch pilihan {
+				case "1":
+					sortPelangganNama(dataPelanggan, countArrPelanggan, &dataPelanggan)
+				case "2":
+					sortPelangganCount(dataPelanggan, countArrPelanggan, &dataPelanggan)
+				}
+				listPelanggan(dataPelanggan, countArrPelanggan)
+			case "4":
+				menuSortingServiceBy()
+				fmt.Scan(&pilihan)
+				switch pilihan {
+				case "1":
+					sortServiceNama(dataService, countArrService, &dataService)
+				case "2":
+					sortServiceHarga(dataService, countArrService, &dataService)
+				}
+				listService(dataService, countArrService)
 			default:
 				fmt.Println("Maaf pilihan tidak valid.")
 			}
@@ -248,7 +336,7 @@ func tambahSparePart(arr *ArrSparepart, nArr *int) {
 func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 	var kembali string
 	kembali = "yes"
-	for i := 0; i < *nArr && kembali == "yes"; i++ {
+	for i := 0; i < IsiArray && kembali == "yes"; i++ {
 		if arr[i].nama == "" {
 			fmt.Println("=================================================")
 			fmt.Println("Silahkan masukan nama pelanggan: ")
@@ -262,9 +350,22 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 			fmt.Scan(&arr[i].specMotor.jenisMotor)
 			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
+			*nArr = *nArr + 1
 		}
-		*nArr = *nArr + 1
 	}
+}
+
+func tambahTransSpare(arr *ArrPelanggan, arrData ArrSparepart, indexSpare, indexPelanggan int) {
+	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexSpare].nama
+	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexSpare].harga
+	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
+
+}
+
+func tambahTransService(arr *ArrPelanggan, arrData ArrService, indexService, indexPelanggan int) {
+	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexService].nama
+	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexService].hargaService
+	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
 }
 
 func editService(arr ArrService, n int, arrOut *ArrService) {
@@ -323,6 +424,13 @@ func deletePelanggan(arr ArrPelanggan, indeks int, arrOut *ArrPelanggan) {
 	arr[indeks].specMotor.stokTersedia = 0
 	arr[indeks].specMotor.tahunPabrikan = 0
 	(*arrOut)[indeks] = arr[indeks]
+}
+
+func deleteMotor(arr ArrMotor, indeks int, arrOut *ArrMotor) {
+	arr[indeks].jenisMotor = ""
+	arr[indeks].merek = ""
+	arr[indeks].stokTersedia = 0
+	arr[indeks].tahunPabrikan = 0
 }
 
 func deleteSparepart(arr ArrSparepart, indeks int, arrOut *ArrSparepart) {
@@ -402,6 +510,60 @@ func sortSparePartStok(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
 func sortSparePartNama(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
 	var j int
 	var temp int
+	for i := 0; i < nArr-1; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if strings.ToLower(arr[j].nama) < strings.ToLower(arr[temp].nama) {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
+}
+
+func sortServiceNama(arr ArrService, nArr int, arrOut *ArrService) {
+	var j int
+	var temp int
+	for i := 0; i < nArr-1; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if strings.ToLower(arr[j].nama) < strings.ToLower(arr[temp].nama) {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
+}
+
+func sortServiceHarga(arr ArrService, nArr int, arrOut *ArrService) {
+	var j int
+	var temp int
+	for i := 0; i < nArr; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if arr[j].hargaService < arr[temp].hargaService {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
+}
+
+func sortPelangganNama(arr ArrPelanggan, nArr int, arrOut *ArrPelanggan) {
+	var j int
+	var temp int
 	for i := 0; i < nArr; i++ {
 		temp = i
 		j = i + 1
@@ -417,15 +579,47 @@ func sortSparePartNama(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
 	}
 }
 
+func sortPelangganCount(arr ArrPelanggan, nArr int, arrOut *ArrPelanggan) {
+	var j int
+	var temp int
+	for i := 0; i < nArr; i++ {
+		temp = i
+		j = i + 1
+		for j < nArr {
+			if arr[j].countTrans < arr[temp].countTrans {
+				temp = j
+			}
+			j++
+		}
+		arr[i], arr[temp] = arr[temp], arr[i]
+		(*arrOut)[i] = arr[i]
+		(*arrOut)[temp] = arr[temp]
+	}
+}
+
 // searchPelanggan mencari pelanggan untuk digunakan pada Edit dan Delete, Mengembalikan Indeks jika ketemu, mengembalikan -1 jika tidak.
 func searchPelanggan(arr ArrPelanggan, key string, nArr int) int {
 	var indeks int
-	for i := 0; i < nArr && arr[i].nama != key; i++ {
-		if arr[i].nama != key {
-			indeks = -1
-		} else if arr[i].nama == key {
-			indeks = i
-		}
+	var i int
+	for i := 0; i < nArr && strings.ToLower(arr[i].nama) != strings.ToLower(key); i++ {
+	}
+	if strings.ToLower(arr[i].nama) != strings.ToLower(key) {
+		indeks = -1
+	} else if strings.ToLower(arr[i].nama) == strings.ToLower(key) {
+		indeks = i
+	}
+	return indeks
+}
+
+func searchService(arr ArrService, key string, nArr int) int {
+	var indeks int
+	var i int
+	for i := 0; i < nArr && strings.ToLower(arr[i].nama) != strings.ToLower(key); i++ {
+	}
+	if strings.ToLower(arr[i].nama) != strings.ToLower(key) {
+		indeks = -1
+	} else if strings.ToLower(arr[i].nama) == strings.ToLower(key) {
+		indeks = i
 	}
 	return indeks
 }
@@ -481,19 +675,28 @@ func listPelanggan(arr ArrPelanggan, nArr int) {
 	}
 }
 
-func listMotor(arr ArrMotor) {
-	for i := 0; i < len(arr); i++ {
-		if arr[i].tahunPabrikan != 0 && arr[i].stokTersedia != 0 && arr[i].jenisMotor != "" && arr[i].merek != "" {
-			fmt.Println(arr[i].tahunPabrikan)
-			fmt.Println(arr[i].merek)
-			fmt.Println(arr[i].jenisMotor)
-			fmt.Println(arr[i].stokTersedia)
+func listMotor(arr ArrMotor, nArr int) {
+	for i := 0; i <= nArr && arr[i].merek != ""; i++ {
+		fmt.Println("=============================")
+		fmt.Printf("Merek: %s \n", arr[i].merek)
+		fmt.Printf("Jenis Motor: %s \n", arr[i].jenisMotor)
+		fmt.Printf("Tahun pabrikan: %d\n", arr[i].tahunPabrikan)
+		fmt.Printf("Stok tersedia: %d \n", arr[i].stokTersedia)
+	}
+}
+
+func listService(arr ArrService, nArr int) {
+	for i := 0; i < nArr; i++ {
+		if arr[i].nama != "" && arr[i].hargaService != 0 {
+			fmt.Println("===============================================")
+			fmt.Printf("Nama Service: %s \n", arr[i].nama)
+			fmt.Printf("Harga Service: %d \n", arr[i].hargaService)
 		}
 	}
 }
 
-func listSparePart(arr ArrSparepart) {
-	for i := 0; i < len(arr); i++ {
+func listSparePart(arr ArrSparepart, nArr int) {
+	for i := 0; i < nArr; i++ {
 		if arr[i].nama != "" && arr[i].harga != 0 && arr[i].stokTersedia != 0 {
 			fmt.Println("=================================================")
 			fmt.Printf("Spare-part: %s \n", arr[i].nama)
@@ -517,6 +720,7 @@ func menuJenisData() {
 	fmt.Println("1. Spare-part")
 	fmt.Println("2. Motor")
 	fmt.Println("3. Pelanggan")
+	fmt.Println("4. Service")
 	fmt.Print("Pilihan: ")
 }
 
@@ -544,4 +748,25 @@ func menuSortingMotorBy() {
 	fmt.Println("3. Stok")
 	fmt.Print("Pilihan: ")
 
+}
+
+func menuSortingPelangganBy() {
+	fmt.Println("Silahkan pilih Sorting berdasarkan: ")
+	fmt.Println("1. Nama")
+	fmt.Println("2. Jumlah Transaksi yang Dilakukan")
+	fmt.Print("Pilihan: ")
+}
+
+func menuSortingServiceBy() {
+	fmt.Println("Silahkan pilih Sorting berdasarkan: ")
+	fmt.Println("1. Nama")
+	fmt.Println("2. Harga")
+	fmt.Print("Pilihan: ")
+}
+
+func menuTransaksi() {
+	fmt.Println("Silakan pilih jenis transaksi: ")
+	fmt.Println("1. Service motor")
+	fmt.Println("2. Beli Sparepart")
+	fmt.Print("Pilihan: ")
 }
