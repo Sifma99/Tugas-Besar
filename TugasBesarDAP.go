@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -62,6 +64,8 @@ type ArrPelanggan [IsiArray]Pelanggan
 
 // ArrService Tipe untuk menampung array tipe bentukan Service.
 type ArrService [IsiArray]Service
+
+var inputreader = bufio.NewReader(os.Stdin)
 
 func main() {
 	var countArrSparepart, countArrPelanggan, countArrMotor, countArrService int
@@ -278,20 +282,21 @@ func nambahMotor(arr *ArrMotor, nArr *int) {
 		kembali string
 	)
 	kembali = "yes"
-	for i := 0; i <= IsiArray && strings.ToLower(kembali) == "yes"; i++ {
+	for i := 0; i < IsiArray && strings.ToLower(kembali) == "yes"; i++ {
 		if arr[i].tahunPabrikan == 0 && arr[i].merek == "" && arr[i].jenisMotor == "" && arr[i].stokTersedia == 0 {
 			fmt.Print("Tahun pabrikan : ")
 			fmt.Scan(&arr[i].tahunPabrikan)
 			fmt.Print("Merek : ")
-			fmt.Scan(&arr[i].merek)
+			fmt.Scanln()
+			(*arr)[i].merek, _ = inputreader.ReadString('\n')
 			fmt.Print("Jenis motor : ")
-			fmt.Scan(&arr[i].jenisMotor)
+			(*arr)[i].jenisMotor, _ = inputreader.ReadString('\n')
+			fmt.Scanln()
 			fmt.Print("Stok tersedia : ")
 			fmt.Scan(&arr[i].stokTersedia)
 			fmt.Println("Apakah kembali ke menu? ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
-			// fmt.Println(arr)
 		}
 	}
 }
@@ -303,7 +308,8 @@ func tambahService(arr *ArrService, nArr *int) {
 		if arr[i].nama == "" {
 			fmt.Println("==================================================")
 			fmt.Println("Silahkan masukan nama Service yang ingin ditambahkan: ")
-			fmt.Scan(&arr[i].nama)
+			fmt.Scanln()
+			(*arr)[i].nama, _ = inputreader.ReadString('\n')
 			fmt.Println("Silahkan masukan tarif Service: ")
 			fmt.Scan(&arr[i].hargaService)
 			fmt.Println("Apakah ingin menambahkan lagi? (Yes/No): ")
@@ -320,7 +326,8 @@ func tambahSparePart(arr *ArrSparepart, nArr *int) {
 		if arr[i].nama == "" && arr[i].harga == 0 && arr[i].stokTersedia == 0 {
 			fmt.Println("===============================================================")
 			fmt.Println("Silahkan masukan spare-part yang ingin ditambahkan: ")
-			fmt.Scan(&arr[i].nama)
+			fmt.Scanln()
+			(*arr)[i].nama, _ = inputreader.ReadString('\n')
 			fmt.Println("Silahkan masukan harga: ")
 			fmt.Scan(&arr[i].harga)
 			fmt.Println("Silahkan masukan Stok yang tersedia: ")
@@ -340,7 +347,9 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 		if arr[i].nama == "" {
 			fmt.Println("=================================================")
 			fmt.Println("Silahkan masukan nama pelanggan: ")
-			fmt.Scan(&arr[i].nama)
+			fmt.Scanln()
+			input, _ := inputreader.ReadString('\n')
+			(*arr)[i].nama = input
 			fmt.Println("Silahkan masukan Spesifikasi Motor ")
 			fmt.Println("Silahkan masukan merek motor: ")
 			fmt.Scan(&arr[i].specMotor.merek)
@@ -355,9 +364,10 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 	}
 }
 
-func tambahTransSpare(arr *ArrPelanggan, arrData ArrSparepart, indexSpare, indexPelanggan int) {
+func tambahTransSpare(arr *ArrPelanggan, arrData *ArrSparepart, indexSpare, indexPelanggan int) {
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexSpare].nama
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexSpare].harga
+	(*arrData)[indexSpare].stokTersedia = (*arrData)[indexSpare].stokTersedia - 1
 	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
 
 }
@@ -400,14 +410,18 @@ func editSparePart(arr ArrSparepart, n int, arrOut *ArrSparepart) {
 
 func editPelanggan(arr ArrPelanggan, n int, arrOut *ArrPelanggan) {
 	fmt.Print("Silahkan masukan nama Pelanggan: ")
-	fmt.Scan(&arr[n].nama)
+	fmt.Scanln()
+	input, _ := inputreader.ReadString('\n')
+	arr[n].nama = input
 	fmt.Println("Silahkan masukan Spesifikasi motor")
 	fmt.Print("Silahkan masukan merek motor: ")
-	fmt.Scan(&arr[n].specMotor.merek)
+	fmt.Scanln()
+	arr[n].specMotor.merek, _ = inputreader.ReadString('\n')
 	fmt.Print("Silahkan Masukan tahun pabrikan motor: ")
 	fmt.Scan(&arr[n].specMotor.tahunPabrikan)
 	fmt.Println("Silahkan masukan jenis motor: ")
-	fmt.Scan(&arr[n].specMotor.jenisMotor)
+	fmt.Scanln()
+	arr[n].specMotor.jenisMotor, _ = inputreader.ReadString('\n')
 	(*arrOut)[n] = arr[n]
 }
 
@@ -667,7 +681,7 @@ func listPelanggan(arr ArrPelanggan, nArr int) {
 	for i := 0; i < nArr; i++ {
 		if arr[i].nama != "" {
 			fmt.Println("========================================")
-			fmt.Printf("Nama: %s \n", arr[i].nama)
+			fmt.Printf("Nama: %s ", arr[i].nama)
 			fmt.Printf("Merek Motor: %s \n", arr[i].specMotor.merek)
 			fmt.Printf("Jenis Motor: %s \n", arr[i].specMotor.jenisMotor)
 			fmt.Printf("Tahun Pabrikan Motor: %d \n", arr[i].specMotor.tahunPabrikan)
@@ -676,12 +690,14 @@ func listPelanggan(arr ArrPelanggan, nArr int) {
 }
 
 func listMotor(arr ArrMotor, nArr int) {
-	for i := 0; i <= nArr && arr[i].merek != ""; i++ {
-		fmt.Println("=============================")
-		fmt.Printf("Merek: %s \n", arr[i].merek)
-		fmt.Printf("Jenis Motor: %s \n", arr[i].jenisMotor)
-		fmt.Printf("Tahun pabrikan: %d\n", arr[i].tahunPabrikan)
-		fmt.Printf("Stok tersedia: %d \n", arr[i].stokTersedia)
+	for i := 0; i < nArr; i++ {
+		if arr[i].merek != "" && arr[i].jenisMotor != "" && arr[i].tahunPabrikan != 0 && arr[i].stokTersedia != 0 {
+			fmt.Println("=============================")
+			fmt.Printf("Merek: %s ", arr[i].merek)
+			fmt.Printf("Jenis Motor: %s ", arr[i].jenisMotor)
+			fmt.Printf("Tahun pabrikan: %d \n", arr[i].tahunPabrikan)
+			fmt.Printf("Stok tersedia: %d \n", arr[i].stokTersedia)
+		}
 	}
 }
 
@@ -689,7 +705,7 @@ func listService(arr ArrService, nArr int) {
 	for i := 0; i < nArr; i++ {
 		if arr[i].nama != "" && arr[i].hargaService != 0 {
 			fmt.Println("===============================================")
-			fmt.Printf("Nama Service: %s \n", arr[i].nama)
+			fmt.Printf("Nama Service: %s ", arr[i].nama)
 			fmt.Printf("Harga Service: %d \n", arr[i].hargaService)
 		}
 	}
@@ -699,7 +715,7 @@ func listSparePart(arr ArrSparepart, nArr int) {
 	for i := 0; i < nArr; i++ {
 		if arr[i].nama != "" && arr[i].harga != 0 && arr[i].stokTersedia != 0 {
 			fmt.Println("=================================================")
-			fmt.Printf("Spare-part: %s \n", arr[i].nama)
+			fmt.Printf("Spare-part: %s ", arr[i].nama)
 			fmt.Printf("Harga: %d \n", arr[i].harga)
 			fmt.Printf("Stok: %d \n", arr[i].stokTersedia)
 		}
