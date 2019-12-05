@@ -121,7 +121,7 @@ func main() {
 				switch pilihan {
 				case "1":
 					cls()
-					listSparePart(dataSparepart, countArrMotor)
+					listSparePart(dataSparepart, countArrSparepart)
 					fmt.Print("Sparepart yang ingin diedit (berdasarkan nama spare-part): ")
 					fmt.Scanln()
 					spareDicari, _ = inputreader.ReadString('\n')
@@ -538,11 +538,16 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 func tambahTransSpare(arr *ArrPelanggan, arrData *ArrSparepart, indexSpare, indexPelanggan int) {
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexSpare].nama
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexSpare].harga
-	stock, _ := strconv.Atoi(arrData[indexSpare].stokTersedia)
-	(*arrData)[indexSpare].stokTersedia = string(stock - 1)
-	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
-	fmt.Println("Masukkan tanggal transaksi (Contoh: 20 Maret 2019): ")
-	fmt.Scan(&arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.tglTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.blnTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.thnTransaksi)
+	stock, _ := strconv.Atoi((*arrData)[indexSpare].stokTersedia)
+	if stock != 0 {
+		sisa := stock - 1
+		(*arrData)[indexSpare].stokTersedia = strconv.Itoa(sisa)
+		(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
+		fmt.Println("Masukkan tanggal transaksi (Contoh: 20 Maret 2019): ")
+		fmt.Scan(&arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.tglTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.blnTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.thnTransaksi)
+	}else {
+		fmt.Println("Maaf stock habis.")
+	}
 }
 
 func tambahTransService(arr *ArrPelanggan, arrData ArrService, indexService, indexPelanggan int) {
@@ -929,7 +934,7 @@ func listPelanggan(arr ArrPelanggan, nArr int) {
 			fmt.Printf("Tahun Pabrikan Motor: %s \n", arr[i].specMotor.tahunPabrikan)
 			for j := 0; j<arr[i].countTrans; j++{
 				fmt.Printf("Transaksi ke-%d : %s \n", j+1, arr[i].jumTransaksi[j].namaTrans)
-				fmt.Printf("Tanggal Transaksi: %s \n",arr[i].jumTransaksi[j].waktu)
+				fmt.Printf("Tanggal Transaksi: %s %s %s \n",arr[i].jumTransaksi[j].waktu.tglTransaksi, arr[i].jumTransaksi[j].waktu.blnTransaksi, arr[i].jumTransaksi[j].waktu.thnTransaksi )
 				harga,_ := strconv.Atoi(arr[i].jumTransaksi[j].hargaTrans)
 				arr[i].totalHarga = arr[i].totalHarga + harga
 			}
