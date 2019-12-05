@@ -4,14 +4,16 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+	"strconv"
 )
 
 // Pelanggan Tipe bentukan pelanggan yang berisi nama, specMotor, jumTransaksi.
 type Pelanggan struct {
 	nama         string
 	specMotor    Motor
-	jumTransaksi []Transaksi
+	jumTransaksi [100]Transaksi
 	countTrans   int
 	totalHarga   int
 }
@@ -19,35 +21,36 @@ type Pelanggan struct {
 // Service Tipe bentukan service yang berisi nama, hargaService.
 type Service struct {
 	nama         string
-	hargaService int
+	hargaService string
 }
 
 // Transaksi Tipe bentukan Transaksi yang berisi namaTrans, hargaTrans.
 type Transaksi struct {
 	namaTrans  string
-	hargaTrans int
+	hargaTrans string
+	waktu	   History
 }
 
 // SparePart Tipe bentukan SparePart yang berisi nama, harga, stokTersedia.
 type SparePart struct {
 	nama         string
-	harga        int
-	stokTersedia int
+	harga        string
+	stokTersedia string
 }
 
 // History Tipe bentukan history yang berisi tglTransaksi, blnTransaksi, thnTransaksi.
 type History struct {
-	tglTransaksi int
-	blnTransaksi int
-	thnTransaksi int
+	tglTransaksi string
+	blnTransaksi string
+	thnTransaksi string
 }
 
 // Motor Tipe bentukan motor yang berisi tahunPabrikan, merek, jenisMotr, stokTersedia.
 type Motor struct {
-	tahunPabrikan int
+	tahunPabrikan string
 	merek         string
 	jenisMotor    string
-	stokTersedia  int
+	stokTersedia  string
 }
 
 // IsiArray Panjang Array
@@ -75,49 +78,67 @@ func main() {
 	var dataSparepart ArrSparepart
 	var dataPelanggan ArrPelanggan
 	var dataService ArrService
-
-	//var pendapatanTotal int
+	var pendapatanTahun int
 	choiceMenu = "Yes"
 	for strings.ToLower(choiceMenu) == "yes" {
+		cls()
 		menuUtama()
 		fmt.Scan(&pilihan)
-		switch pilihan {
+		for pilihan != "1" && pilihan != "2" && pilihan != "3" && pilihan != "4" {
+			fmt.Print("Maaf input tidak valid, Silahkan masukkan lagi: ")
+			fmt.Scan(&pilihan)
+		}
+ 		switch pilihan {
 		case "1":
+			cls()
 			menuTambahEdit()
 			fmt.Scan(&pilihan)
 			switch pilihan {
 			case "1":
+				cls()
 				menuJenisData()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
 					tambahSparePart(&dataSparepart, &countArrSparepart)
 				case "2":
+					cls()
 					nambahMotor(&dataMotor, &countArrMotor)
 				case "3":
+					cls()
 					tambahPelanggan(&dataPelanggan, &countArrPelanggan)
 				case "4":
+					cls()
 					tambahService(&dataService, &countArrService)
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
 			case "2":
+				cls()
 				menuJenisData()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
-					fmt.Print("Sparepart yang ingin diedit: ")
-					fmt.Scan(&spareDicari)
+					cls()
+					listSparePart(dataSparepart, countArrMotor)
+					fmt.Print("Sparepart yang ingin diedit (berdasarkan nama spare-part): ")
+					fmt.Scanln()
+					spareDicari, _ = inputreader.ReadString('\n')
+					spareDicari = strings.TrimSpace(spareDicari)
 					idxSpare = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
 					if idxSpare != -1 {
 						editSparePart(dataSparepart, idxSpare, &dataSparepart)
 					} else {
-						fmt.Printf("Maaf tidak terdapat %s.", spareDicari)
-						fmt.Println("")
+						fmt.Printf("Maaf tidak terdapat %s. \n", spareDicari)
 					}
 				case "2":
-					fmt.Print("Motor yang ingin diedit: ")
-					fmt.Scan(&motorDicari)
+					cls()
+					listMotor(dataMotor, countArrMotor)
+					fmt.Print("Motor yang ingin diedit (berdasarkan merek motor): ")
+					fmt.Scanln()
+					motorDicari, _ = inputreader.ReadString('\n')
+					motorDicari = strings.TrimSpace(motorDicari)
 					idxMotor = searchMotor(dataMotor, motorDicari, countArrMotor)
 					if idxMotor != -1 {
 						editMotor(dataMotor, idxMotor, &dataMotor)
@@ -125,8 +146,12 @@ func main() {
 						fmt.Printf("Maaf tidak terdapat %s.\n", motorDicari)
 					}
 				case "3":
-					fmt.Print("Pelanggan yang ingin diedit: ")
-					fmt.Scan(&pelangganDicari)
+					cls()
+					listPelanggan(dataPelanggan, countArrPelanggan)
+					fmt.Print("Pelanggan yang ingin diedit (berdasarkan nama pelanggan): ")
+					fmt.Scanln()
+					pelangganDicari, _ = inputreader.ReadString('\n')
+					pelangganDicari = strings.TrimSpace(pelangganDicari)
 					idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
 					if idxPelanggan != -1 {
 						editPelanggan(dataPelanggan, idxPelanggan, &dataPelanggan)
@@ -134,11 +159,15 @@ func main() {
 						fmt.Printf("Maaf tidak terdapat %s. \n", pelangganDicari)
 					}
 				case "4":
-					fmt.Print("Jenis service yang ingin diedit: ")
-					fmt.Scan(&serviceDicari)
+					cls()
+					listService(dataService, countArrService)
+					fmt.Print("Jenis service yang ingin diedit (berdasarkan nama service): ")
+					fmt.Scanln()
+					serviceDicari, _ = inputreader.ReadString('\n')
+					serviceDicari = strings.TrimSpace(serviceDicari)
 					idxService = searchService(dataService, serviceDicari, countArrService)
 					if idxService != -1 {
-						editService(dataService, idxSpare, &dataService)
+						editService(dataService, idxService, &dataService)
 					} else {
 						fmt.Printf("Maaf tidak terdapat %s. \n", serviceDicari)
 					}
@@ -146,40 +175,63 @@ func main() {
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
 			case "3":
+				cls()
 				menuJenisData()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
+					listSparePart(dataSparepart, countArrSparepart)
 					fmt.Print("Sparepart yang ingin dihapus: ")
-					fmt.Scan(&spareDicari)
+					fmt.Scanln()
+					spareDicari, _ = inputreader.ReadString('\n')
+					spareDicari = strings.TrimSpace(spareDicari)
 					idxSpare = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
 					if idxSpare != -1 {
 						deleteSparepart(dataSparepart, idxSpare, &dataSparepart)
+						fmt.Println("Data telah dihapus.")
+					} else {
+						fmt.Printf("Maaf tidak terdapat %s. \n", motorDicari)
 					}
 				case "2":
+					cls()
+					listMotor(dataMotor, countArrPelanggan)
 					fmt.Print("Motor yang ingin dihapus: ")
-					fmt.Scan(&motorDicari)
+					fmt.Scanln()
+					motorDicari, _ = inputreader.ReadString('\n')
+					motorDicari = strings.TrimSpace(motorDicari)
 					idxMotor = searchMotor(dataMotor, motorDicari, countArrMotor)
 					if idxMotor != -1 {
 						deleteMotor(dataMotor, idxMotor, &dataMotor)
+						fmt.Println("Data telah dihapus.")
 					} else {
 						fmt.Printf("Maaf tidak terdapat %s. \n", motorDicari)
 					}
 				case "3":
+					cls()
+					listPelanggan(dataPelanggan, countArrPelanggan)
 					fmt.Print("Pelanggan yang ingin dihapus: ")
-					fmt.Scan(&pelangganDicari)
+					fmt.Scanln()
+					pelangganDicari, _ = inputreader.ReadString('\n')
+					pelangganDicari = strings.TrimSpace(pelangganDicari)
 					idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
 					if idxPelanggan != -1 {
 						deletePelanggan(dataPelanggan, idxPelanggan, &dataPelanggan)
+						fmt.Println("Data telah dihapus.")
 					} else {
 						fmt.Printf("Maaf idak terdapat %s.\n", pelangganDicari)
 					}
 				case "4":
+					cls()
+					listService(dataService, countArrService)
 					fmt.Print("Service yang ingin dihapus: ")
-					fmt.Scan(&serviceDicari)
+					fmt.Scanln()
+					serviceDicari, _ = inputreader.ReadString('\n')
+					serviceDicari = strings.TrimSpace(serviceDicari)
 					idxService = searchService(dataService, serviceDicari, countArrService)
 					if idxService != -1 {
 						deleteService(dataService, idxService, &dataService)
+						fmt.Println("Data telah dihapus.")
 					} else {
 						fmt.Printf("Maaf tidak terdapat %s. \n", serviceDicari)
 					}
@@ -188,10 +240,20 @@ func main() {
 				fmt.Println("Maaf pilihan tidak valid.")
 			}
 		case "2":
+			cls()
 			menuTransaksi()
 			fmt.Scan(&pilihan)
+			for pilihan != "1" && pilihan != "2" {
+				fmt.Println("Maaf input tidak valid.")
+				fmt.Print("Silahkan coba lagi: ")
+				fmt.Scan(&pilihan)
+			}
+			cls()
+			viewPelanggan(dataPelanggan, countArrPelanggan)
 			fmt.Println("Silahkan masukan nama pelanggan: ")
-			fmt.Scan(&pelangganDicari)
+			fmt.Scanln()
+			pelangganDicari, _ = inputreader.ReadString('\n')
+			pelangganDicari = strings.TrimSpace(pelangganDicari)
 			idxPelanggan = searchPelanggan(dataPelanggan, pelangganDicari, countArrPelanggan)
 			if idxPelanggan != 1 {
 				switch pilihan {
@@ -200,10 +262,26 @@ func main() {
 					sortServiceHarga(dataService, countArrService, &dataService)
 					listService(dataService, countArrService)
 					fmt.Print("Pilihan: ")
-					fmt.Scan(&serviceDicari)
+					serviceDicari, _ = inputreader.ReadString('\n')
+					serviceDicari = strings.TrimSpace(serviceDicari)
 					idxService = searchService(dataService, serviceDicari, countArrService)
 					if idxService != -1 {
 						tambahTransService(&dataPelanggan, dataService, idxService, idxPelanggan)
+					}else {
+						fmt.Printf("Maaf tidak terdapat %s. \n",serviceDicari)
+					}
+				case "2":
+					fmt.Println("Silahkan masukkan jenis service yang ingin dilakukan: ")
+					sortSparePartHarga(dataSparepart, countArrSparepart, &dataSparepart)
+					listSparePart(dataSparepart, countArrSparepart)
+					fmt.Print("Pilihan: ")
+					spareDicari, _ =inputreader.ReadString('\n')
+					spareDicari = strings.TrimSpace(spareDicari)
+					idxSpare = searchSparePart(dataSparepart, spareDicari, countArrSparepart)
+					if idxSpare != -1 {
+						tambahTransSpare(&dataPelanggan, &dataSparepart, idxSpare, idxPelanggan)
+					}else {
+						fmt.Printf("Maaf tidak terdapat %s. \n",spareDicari)
 					}
 				}
 			} else {
@@ -211,64 +289,82 @@ func main() {
 			}
 
 		case "3":
+			cls()
 			menuJenisData()
 			fmt.Scan(&pilihan)
 			switch pilihan {
 			case "1":
+				cls()
 				menuSortingSpareBy()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
 					sortSparePartNama(dataSparepart, countArrSparepart, &dataSparepart)
 				case "2":
+					cls()
 					sortSparePartHarga(dataSparepart, countArrSparepart, &dataSparepart)
 				case "3":
+					cls()
 					sortSparePartStok(dataSparepart, countArrSparepart, &dataSparepart)
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
 				listSparePart(dataSparepart, countArrSparepart)
 			case "2":
+				cls()
 				menuSortingMotorBy()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
 					sortMotorMerek(dataMotor, countArrMotor, &dataMotor)
 				case "2":
+					cls()
 					sortMotorTahun(dataMotor, countArrMotor, &dataMotor)
 				case "3":
+					cls()
 					sortMotorStok(dataMotor, countArrMotor, &dataMotor)
 				default:
 					fmt.Println("Maaf pilihan tidak valid.")
 				}
 				listMotor(dataMotor, countArrMotor)
 			case "3":
+				cls()
 				menuSortingPelangganBy()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
 					sortPelangganNama(dataPelanggan, countArrPelanggan, &dataPelanggan)
 				case "2":
+					cls()
 					sortPelangganCount(dataPelanggan, countArrPelanggan, &dataPelanggan)
 				}
 				listPelanggan(dataPelanggan, countArrPelanggan)
 			case "4":
+				cls()
 				menuSortingServiceBy()
 				fmt.Scan(&pilihan)
 				switch pilihan {
 				case "1":
+					cls()
 					sortServiceNama(dataService, countArrService, &dataService)
 				case "2":
+					cls()
 					sortServiceHarga(dataService, countArrService, &dataService)
 				}
 				listService(dataService, countArrService)
 			default:
 				fmt.Println("Maaf pilihan tidak valid.")
 			}
-		default:
-			fmt.Println("Maaf pilihan tidak valid.")
+		case "4":
+			cls()
+			totalPendapatan(dataPelanggan, &pendapatanTahun, countArrPelanggan)
+			fmt.Printf("Total Pendapatan: %d\n",pendapatanTahun)
 		}
-		fmt.Println("Kembali ke menu ? (Yes / No): ")
+		// cls()
+		fmt.Println("Kembali ke menu utama? (Yes / No): ")
 		fmt.Scan(&choiceMenu)
 		for strings.ToLower(choiceMenu) != "no" && strings.ToLower(choiceMenu) != "yes" {
 			fmt.Println("Maaf input anda tidak valid, silahkan masukkan (Yes) atau (No)")
@@ -277,24 +373,54 @@ func main() {
 	}
 }
 
+//untuk nge cek inputannya integer semua atau ngga
+func checkInt(x int) (bool bool){
+	if x > 0{
+		bool = true
+	}else{
+		bool = false
+	}
+	return bool
+}
+
 func nambahMotor(arr *ArrMotor, nArr *int) {
 	var (
 		kembali string
+		bool bool
 	)
 	kembali = "yes"
 	for i := 0; i < IsiArray && strings.ToLower(kembali) == "yes"; i++ {
-		if arr[i].tahunPabrikan == 0 && arr[i].merek == "" && arr[i].jenisMotor == "" && arr[i].stokTersedia == 0 {
-			fmt.Print("Tahun pabrikan : ")
-			fmt.Scan(&arr[i].tahunPabrikan)
-			fmt.Print("Merek : ")
+		if arr[i].tahunPabrikan == "" && arr[i].merek == "" && arr[i].jenisMotor == "" && arr[i].stokTersedia == "" {
+			fmt.Print("Merek: ")
 			fmt.Scanln()
 			(*arr)[i].merek, _ = inputreader.ReadString('\n')
-			fmt.Print("Jenis motor : ")
+			(*arr)[i].merek = strings.TrimSpace((*arr)[i].merek)
+			fmt.Print("Jenis motor: ")
 			(*arr)[i].jenisMotor, _ = inputreader.ReadString('\n')
-			fmt.Scanln()
-			fmt.Print("Stok tersedia : ")
-			fmt.Scan(&arr[i].stokTersedia)
-			fmt.Println("Apakah kembali ke menu? ")
+			(*arr)[i].jenisMotor = strings.TrimSpace((*arr)[i].jenisMotor)
+			fmt.Print("Tahun pabrikan: ")
+			fmt.Scanln(&arr[i].tahunPabrikan)
+			thnpab, _ := strconv.Atoi(arr[i].tahunPabrikan)
+			bool = checkInt(thnpab)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Tahun pabrikan: ")
+				fmt.Scanln(&arr[i].tahunPabrikan)
+				thnpab, _ := strconv.Atoi(arr[i].tahunPabrikan)
+				bool = checkInt(thnpab)
+			}
+			fmt.Print("Stok tersedia: ")
+			fmt.Scanln(&arr[i].stokTersedia)
+			stock, _ := strconv.Atoi(arr[i].stokTersedia)
+			bool = checkInt(stock)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Stok tersedia: ")
+				fmt.Scanln(&arr[i].stokTersedia)
+				stock, _ := strconv.Atoi(arr[i].stokTersedia)
+				bool = checkInt(stock)
+			}
+			fmt.Println("Apakah ingin menambahkan lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
 		}
@@ -302,16 +428,28 @@ func nambahMotor(arr *ArrMotor, nArr *int) {
 }
 
 func tambahService(arr *ArrService, nArr *int) {
-	var kembali string
+	var (
+		kembali string
+		bool bool
+	)
 	kembali = "yes"
 	for i := 0; i < IsiArray && strings.ToLower(kembali) == "yes"; i++ {
 		if arr[i].nama == "" {
-			fmt.Println("==================================================")
-			fmt.Println("Silahkan masukan nama Service yang ingin ditambahkan: ")
+			fmt.Print("Nama Service: ")
 			fmt.Scanln()
 			(*arr)[i].nama, _ = inputreader.ReadString('\n')
-			fmt.Println("Silahkan masukan tarif Service: ")
-			fmt.Scan(&arr[i].hargaService)
+			(*arr)[i].nama = strings.TrimSpace((*arr)[i].nama)
+			fmt.Print("Tarif Service: ")
+			fmt.Scanln(&arr[i].hargaService)
+			harga, _ := strconv.Atoi(arr[i].hargaService)
+			bool = checkInt(harga)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Tarif Service: ")
+				fmt.Scanln(&arr[i].hargaService)
+				harga, _ := strconv.Atoi(arr[i].hargaService)
+				bool = checkInt(harga)
+			}
 			fmt.Println("Apakah ingin menambahkan lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
@@ -320,43 +458,76 @@ func tambahService(arr *ArrService, nArr *int) {
 }
 
 func tambahSparePart(arr *ArrSparepart, nArr *int) {
-	var kembali string
+	var (
+		kembali string
+		bool bool
+	)
 	kembali = "yes"
 	for i := 0; i < IsiArray && strings.ToLower(kembali) == "yes"; i++ {
-		if arr[i].nama == "" && arr[i].harga == 0 && arr[i].stokTersedia == 0 {
-			fmt.Println("===============================================================")
-			fmt.Println("Silahkan masukan spare-part yang ingin ditambahkan: ")
+		if arr[i].nama == "" && arr[i].harga == "" && arr[i].stokTersedia == "" {
+			fmt.Print("Nama spare-part: ")
 			fmt.Scanln()
 			(*arr)[i].nama, _ = inputreader.ReadString('\n')
-			fmt.Println("Silahkan masukan harga: ")
+			(*arr)[i].nama = strings.TrimSpace((*arr)[i].nama)
+			fmt.Print("Jumlah harga: ")
 			fmt.Scan(&arr[i].harga)
-			fmt.Println("Silahkan masukan Stok yang tersedia: ")
+			harga, _ := strconv.Atoi(arr[i].harga)
+			bool = checkInt(harga)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Jumlah harga: ")
+				fmt.Scan(&arr[i].harga)
+				harga, _ := strconv.Atoi(arr[i].harga)
+				bool = checkInt(harga)
+			}
+			fmt.Print("Stok tersedia: ")
 			fmt.Scan(&arr[i].stokTersedia)
+			stock, _ := strconv.Atoi(arr[i].stokTersedia)
+			bool = checkInt(stock)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Stok tersedia: ")
+				fmt.Scan(&arr[i].stokTersedia)
+				stock, _ := strconv.Atoi(arr[i].stokTersedia)
+				bool = checkInt(stock)
+			}
 			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
 		}
-
 	}
 }
 
 func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
-	var kembali string
+	var (
+		kembali string
+		bool bool
+	)
 	kembali = "yes"
 	for i := 0; i < IsiArray && kembali == "yes"; i++ {
 		if arr[i].nama == "" {
-			fmt.Println("=================================================")
-			fmt.Println("Silahkan masukan nama pelanggan: ")
+			fmt.Print("Nama pelanggan: ")
 			fmt.Scanln()
-			input, _ := inputreader.ReadString('\n')
-			(*arr)[i].nama = input
-			fmt.Println("Silahkan masukan Spesifikasi Motor ")
-			fmt.Println("Silahkan masukan merek motor: ")
-			fmt.Scan(&arr[i].specMotor.merek)
-			fmt.Println("Silahkan masukan Tahun Pabrikan Motor: ")
+			(*arr)[i].nama, _ = inputreader.ReadString('\n')
+			(*arr)[i].nama = strings.TrimSpace((*arr)[i].nama)
+			fmt.Println("Silahkan masukan Spesifikasi Motor")
+			fmt.Print("Merek motor: ")
+			(*arr)[i].specMotor.merek, _ = inputreader.ReadString('\n')
+			(*arr)[i].specMotor.merek = strings.TrimSpace((*arr)[i].specMotor.merek)
+			fmt.Print("Jenis motor: ")
+			(*arr)[i].specMotor.jenisMotor, _ = inputreader.ReadString('\n')
+			(*arr)[i].specMotor.jenisMotor = strings.TrimSpace((*arr)[i].specMotor.jenisMotor)
+			fmt.Print("Tahun pabrikan Motor: ")
 			fmt.Scan(&arr[i].specMotor.tahunPabrikan)
-			fmt.Println("Silahkan masukan Jenis motor: ")
-			fmt.Scan(&arr[i].specMotor.jenisMotor)
+			thnpab2, _ := strconv.Atoi(arr[i].specMotor.tahunPabrikan)
+			bool = checkInt(thnpab2)
+			for bool == false {
+				fmt.Println("Inputan harus integer, silahkan ulangi.")
+				fmt.Print("Tahun pabrikan Motor: ")
+				fmt.Scan(&arr[i].specMotor.tahunPabrikan)
+				thnpab2, _ := strconv.Atoi(arr[i].specMotor.tahunPabrikan)
+				bool = checkInt(thnpab2)
+			}
 			fmt.Println("Apakah ingin memasukan data lagi? (Yes/No): ")
 			fmt.Scan(&kembali)
 			*nArr = *nArr + 1
@@ -367,67 +538,132 @@ func tambahPelanggan(arr *ArrPelanggan, nArr *int) {
 func tambahTransSpare(arr *ArrPelanggan, arrData *ArrSparepart, indexSpare, indexPelanggan int) {
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexSpare].nama
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexSpare].harga
-	(*arrData)[indexSpare].stokTersedia = (*arrData)[indexSpare].stokTersedia - 1
+	stock, _ := strconv.Atoi(arrData[indexSpare].stokTersedia)
+	(*arrData)[indexSpare].stokTersedia = string(stock - 1)
 	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
-
+	fmt.Println("Masukkan tanggal transaksi (Contoh: 20 Maret 2019): ")
+	fmt.Scan(&arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.tglTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.blnTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.thnTransaksi)
 }
 
 func tambahTransService(arr *ArrPelanggan, arrData ArrService, indexService, indexPelanggan int) {
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].namaTrans = arrData[indexService].nama
 	(*arr)[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].hargaTrans = arrData[indexService].hargaService
 	(*arr)[indexPelanggan].countTrans = (*arr)[indexPelanggan].countTrans + 1
+	fmt.Println("Masukkan tanggal transaksi (Contoh: 20 Maret 2019): ")
+	fmt.Scan(&arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.tglTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.blnTransaksi, &arr[indexPelanggan].jumTransaksi[(*arr)[indexPelanggan].countTrans].waktu.thnTransaksi)
 }
 
 func editService(arr ArrService, n int, arrOut *ArrService) {
-	fmt.Print("Silahkan masukan nama Service: ")
-	fmt.Scan(&arr[n].nama)
-	fmt.Print("Silahkan masukan Tarif Service: ")
-	fmt.Scan(&arr[n].hargaService)
+	var bool bool
+	fmt.Print("Nama service: ")
+	(arr)[n].nama, _ = inputreader.ReadString('\n')
+	(arr)[n].nama = strings.TrimSpace((arr)[n].nama)
+	fmt.Print("Tarif Service: ")
+	fmt.Scanln(&arr[n].hargaService)
+	harga, _ := strconv.Atoi(arr[n].hargaService)
+	bool = checkInt(harga)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Tarif Service: ")
+		fmt.Scanln(&arr[n].hargaService)
+		harga, _ := strconv.Atoi(arr[n].hargaService)
+		bool = checkInt(harga)
+	}
 	(*arrOut)[n] = arr[n]
 }
 
 func editMotor(arr ArrMotor, n int, arrOut *ArrMotor) {
-	fmt.Print("Silahkan masukan tahun: ")
-	fmt.Scan(&arr[n].tahunPabrikan)
-	fmt.Print("Silahkan masukan merek motor: ")
-	fmt.Scan(&arr[n].merek)
-	fmt.Print("Silahkan masukan jenis motor: ")
-	fmt.Scan(&arr[n].jenisMotor)
-	fmt.Print("Silahkan masukan Stok yang tersedia: ")
-	fmt.Scan(&arr[n].stokTersedia)
+	var bool bool
+	fmt.Print("Merek: ")
+	(arr)[n].merek, _ = inputreader.ReadString('\n')
+	(arr)[n].merek = strings.TrimSpace((arr)[n].merek)
+	fmt.Print("Jenis motor: ")
+	(arr)[n].jenisMotor, _ = inputreader.ReadString('\n')
+	(arr)[n].jenisMotor = strings.TrimSpace((arr)[n].jenisMotor)
+	fmt.Print("Tahun pabrikan: ")
+	fmt.Scanln(&arr[n].tahunPabrikan)
+	thnpab, _ := strconv.Atoi(arr[n].tahunPabrikan)
+	bool = checkInt(thnpab)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Tahun pabrikan: ")
+		fmt.Scanln(&arr[n].tahunPabrikan)
+		thnpab, _ := strconv.Atoi(arr[n].tahunPabrikan)
+		bool = checkInt(thnpab)
+	}
+	fmt.Print("Stok tersedia: ")
+	fmt.Scanln(&arr[n].stokTersedia)
+	stock, _ := strconv.Atoi(arr[n].stokTersedia)
+	bool = checkInt(stock)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Stok tersedia: ")
+		fmt.Scanln(&arr[n].stokTersedia)
+		stock, _ := strconv.Atoi(arr[n].stokTersedia)
+		bool = checkInt(stock)
+	}
 	(*arrOut)[n] = arr[n]
 }
 
 func editSparePart(arr ArrSparepart, n int, arrOut *ArrSparepart) {
-	fmt.Print("Silahkan masukan nama spare-part: ")
-	fmt.Scan(&arr[n].nama)
-	fmt.Print("Silahkan masukan harga: ")
+	var bool bool
+	fmt.Print("Nama spare-part: ")
+	(arr)[n].nama, _ = inputreader.ReadString('\n')
+	(arr)[n].nama = strings.TrimSpace((arr)[n].nama)
+	fmt.Print("Jumlah harga: ")
 	fmt.Scan(&arr[n].harga)
-	fmt.Print("Silahkan masukan Stok yang tersedia: ")
+	harga, _ := strconv.Atoi(arr[n].harga)
+	bool = checkInt(harga)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Jumlah harga: ")
+		fmt.Scan(&arr[n].harga)
+		harga, _ := strconv.Atoi(arr[n].harga)
+		bool = checkInt(harga)
+	}
+	fmt.Print("Stok tersedia: ")
 	fmt.Scan(&arr[n].stokTersedia)
+	stock, _ := strconv.Atoi(arr[n].stokTersedia)
+	bool = checkInt(stock)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Stok tersedia: ")
+		fmt.Scan(&arr[n].stokTersedia)
+		stock, _ := strconv.Atoi(arr[n].stokTersedia)
+		bool = checkInt(stock)
+	}
 	(*arrOut)[n] = arr[n]
 }
 
 func editPelanggan(arr ArrPelanggan, n int, arrOut *ArrPelanggan) {
-	fmt.Print("Silahkan masukan nama Pelanggan: ")
-	fmt.Scanln()
-	input, _ := inputreader.ReadString('\n')
-	arr[n].nama = input
-	fmt.Println("Silahkan masukan Spesifikasi motor")
-	fmt.Print("Silahkan masukan merek motor: ")
-	fmt.Scanln()
-	arr[n].specMotor.merek, _ = inputreader.ReadString('\n')
-	fmt.Print("Silahkan Masukan tahun pabrikan motor: ")
+	var bool bool
+	fmt.Print("Nama pelanggan: ")
+	(arr)[n].nama, _ = inputreader.ReadString('\n')
+	(arr)[n].nama = strings.TrimSpace((arr)[n].nama)
+	fmt.Println("Silahkan masukan Spesifikasi Motor")
+	fmt.Print("Merek motor: ")
+	(arr)[n].specMotor.merek, _ = inputreader.ReadString('\n')
+	(arr)[n].specMotor.merek = strings.TrimSpace((arr)[n].specMotor.merek)
+	fmt.Print("Jenis motor: ")
+	(arr)[n].specMotor.jenisMotor, _ = inputreader.ReadString('\n')
+	(arr)[n].specMotor.jenisMotor = strings.TrimSpace((arr)[n].specMotor.jenisMotor)
+	fmt.Print("Tahun pabrikan Motor: ")
 	fmt.Scan(&arr[n].specMotor.tahunPabrikan)
-	fmt.Println("Silahkan masukan jenis motor: ")
-	fmt.Scanln()
-	arr[n].specMotor.jenisMotor, _ = inputreader.ReadString('\n')
+	thnpab2, _ := strconv.Atoi(arr[n].specMotor.tahunPabrikan)
+	bool = checkInt(thnpab2)
+	for bool == false {
+		fmt.Println("Inputan harus integer, silahkan ulangi.")
+		fmt.Print("Tahun pabrikan Motor: ")
+		fmt.Scan(&arr[n].specMotor.tahunPabrikan)
+		thnpab2, _ := strconv.Atoi(arr[n].specMotor.tahunPabrikan)
+		bool = checkInt(thnpab2)
+	}
 	(*arrOut)[n] = arr[n]
 }
 
 func deleteService(arr ArrService, indeks int, arrOut *ArrService) {
 	arr[indeks].nama = ""
-	arr[indeks].hargaService = 0
+	arr[indeks].hargaService = ""
 	(*arrOut)[indeks] = arr[indeks]
 }
 
@@ -435,22 +671,22 @@ func deletePelanggan(arr ArrPelanggan, indeks int, arrOut *ArrPelanggan) {
 	arr[indeks].nama = ""
 	arr[indeks].specMotor.jenisMotor = ""
 	arr[indeks].specMotor.merek = ""
-	arr[indeks].specMotor.stokTersedia = 0
-	arr[indeks].specMotor.tahunPabrikan = 0
+	arr[indeks].specMotor.stokTersedia = ""
+	arr[indeks].specMotor.tahunPabrikan = ""
 	(*arrOut)[indeks] = arr[indeks]
 }
 
 func deleteMotor(arr ArrMotor, indeks int, arrOut *ArrMotor) {
 	arr[indeks].jenisMotor = ""
 	arr[indeks].merek = ""
-	arr[indeks].stokTersedia = 0
-	arr[indeks].tahunPabrikan = 0
+	arr[indeks].stokTersedia = ""
+	arr[indeks].tahunPabrikan = ""
 }
 
 func deleteSparepart(arr ArrSparepart, indeks int, arrOut *ArrSparepart) {
-	arr[indeks].harga = 0
+	arr[indeks].harga = ""
 	arr[indeks].nama = ""
-	arr[indeks].stokTersedia = 0
+	arr[indeks].stokTersedia = ""
 	(*arrOut)[indeks] = arr[indeks]
 }
 
@@ -508,7 +744,10 @@ func sortSparePartHarga(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
 }
 
 func sortSparePartStok(arr ArrSparepart, nArr int, arrOut *ArrSparepart) {
-	var temp, j int
+	var(
+		j int
+		temp string
+	) 
 	for i := 0; i < nArr; i++ {
 		temp = arr[i].stokTersedia
 		j = i
@@ -643,18 +882,20 @@ func searchMotor(arr ArrMotor, key string, nArr int) int {
 	awal = 0
 	akhir = nArr - 1
 	tengah = (awal + akhir) / 2
-	for awal < akhir && arr[tengah].merek != key {
-		if arr[tengah].merek > key {
+	for awal < akhir && strings.ToLower(arr[tengah].jenisMotor) != strings.ToLower(key) {
+		if strings.ToLower(arr[tengah].jenisMotor) > strings.ToLower(key) {
 			akhir = tengah - 1
 		} else {
 			awal = tengah + 1
 		}
 		tengah = (awal + akhir) / 2
+		fmt.Println(tengah)
 	}
-	if arr[tengah].merek == key {
+	if strings.ToLower(arr[tengah].jenisMotor) == strings.ToLower(key) {
 		return tengah
+	}else{
+		return -1
 	}
-	return -1
 }
 
 // Misalkan Data sudah di sort
@@ -663,7 +904,7 @@ func searchSparePart(arr ArrSparepart, key string, nArr int) int {
 	awal = 0
 	akhir = nArr - 1
 	tengah = (awal + akhir) / 2
-	for awal < akhir && arr[tengah].nama != key {
+	for awal < akhir && strings.ToLower(arr[tengah].nama) != strings.ToLower(key) {
 		if arr[tengah].nama > key {
 			akhir = tengah - 1
 		} else {
@@ -671,54 +912,82 @@ func searchSparePart(arr ArrSparepart, key string, nArr int) int {
 		}
 		tengah = (awal + akhir) / 2
 	}
-	if arr[tengah].nama == key {
+	if strings.ToLower(arr[tengah].nama) == strings.ToLower(key) {
 		return tengah
+	}else{
+		return -1
 	}
-	return -1
 }
 
 func listPelanggan(arr ArrPelanggan, nArr int) {
-	for i := 0; i < nArr; i++ {
+	for i := 0; i <= nArr; i++ {
 		if arr[i].nama != "" {
 			fmt.Println("========================================")
-			fmt.Printf("Nama: %s ", arr[i].nama)
-			fmt.Printf("Merek Motor: %s \n", arr[i].specMotor.merek)
-			fmt.Printf("Jenis Motor: %s \n", arr[i].specMotor.jenisMotor)
-			fmt.Printf("Tahun Pabrikan Motor: %d \n", arr[i].specMotor.tahunPabrikan)
+			fmt.Println("Nama: ", arr[i].nama)
+			fmt.Println("Merek Motor: ", arr[i].specMotor.merek)
+			fmt.Println("Jenis Motor: ", arr[i].specMotor.jenisMotor)
+			fmt.Printf("Tahun Pabrikan Motor: %s \n", arr[i].specMotor.tahunPabrikan)
+			for j := 0; j<arr[i].countTrans; j++{
+				fmt.Printf("Transaksi ke-%d : %s \n", j+1, arr[i].jumTransaksi[j].namaTrans)
+				fmt.Printf("Tanggal Transaksi: %s \n",arr[i].jumTransaksi[j].waktu)
+				harga,_ := strconv.Atoi(arr[i].jumTransaksi[j].hargaTrans)
+				arr[i].totalHarga = arr[i].totalHarga + harga
+			}
+			fmt.Println("Total harga: ", arr[i].totalHarga)
+			fmt.Println("========================================")
 		}
 	}
 }
 
 func listMotor(arr ArrMotor, nArr int) {
-	for i := 0; i < nArr; i++ {
-		if arr[i].merek != "" && arr[i].jenisMotor != "" && arr[i].tahunPabrikan != 0 && arr[i].stokTersedia != 0 {
+	for i := 0; i <= nArr; i++ {
+		if arr[i].merek != "" && arr[i].jenisMotor != "" && arr[i].tahunPabrikan != "" && arr[i].stokTersedia != "" {
 			fmt.Println("=============================")
-			fmt.Printf("Merek: %s ", arr[i].merek)
-			fmt.Printf("Jenis Motor: %s ", arr[i].jenisMotor)
-			fmt.Printf("Tahun pabrikan: %d \n", arr[i].tahunPabrikan)
-			fmt.Printf("Stok tersedia: %d \n", arr[i].stokTersedia)
+			fmt.Println("Merek: ", arr[i].merek)
+			fmt.Println("Jenis Motor: ", arr[i].jenisMotor)
+			fmt.Println("Tahun Pabrikan: ", arr[i].tahunPabrikan)
+			fmt.Println("Stok tersedia: ", arr[i].stokTersedia)
+			fmt.Println("=============================")
 		}
 	}
 }
 
 func listService(arr ArrService, nArr int) {
-	for i := 0; i < nArr; i++ {
-		if arr[i].nama != "" && arr[i].hargaService != 0 {
+	for i := 0; i <= nArr; i++ {
+		if arr[i].nama != "" && arr[i].hargaService != "" {
 			fmt.Println("===============================================")
-			fmt.Printf("Nama Service: %s ", arr[i].nama)
-			fmt.Printf("Harga Service: %d \n", arr[i].hargaService)
+			fmt.Println("Nama Service: ", arr[i].nama)
+			fmt.Println("Harga Service: ", arr[i].hargaService)
+			fmt.Println("===============================================")
 		}
 	}
 }
 
 func listSparePart(arr ArrSparepart, nArr int) {
-	for i := 0; i < nArr; i++ {
-		if arr[i].nama != "" && arr[i].harga != 0 && arr[i].stokTersedia != 0 {
+	for i := 0; i <= nArr; i++ {
+		if arr[i].nama != "" && arr[i].harga != "" && arr[i].stokTersedia != "" {
 			fmt.Println("=================================================")
-			fmt.Printf("Spare-part: %s ", arr[i].nama)
-			fmt.Printf("Harga: %d \n", arr[i].harga)
-			fmt.Printf("Stok: %d \n", arr[i].stokTersedia)
+			fmt.Println("Spare-part: ", arr[i].nama)
+			fmt.Println("Harga: ", arr[i].harga)
+			fmt.Println("Stok: ", arr[i].stokTersedia)
+			fmt.Println("=================================================")
 		}
+	}
+}
+
+func totalPendapatan(arr ArrPelanggan, totPendapatan *int, nPelanggan int) {
+	*totPendapatan = 0
+	for i := 0; i < nPelanggan; i++ {
+		for j := 0; j < arr[i].countTrans; j++ {
+			harga,_ := strconv.Atoi(arr[i].jumTransaksi[j].hargaTrans)
+			*totPendapatan = *totPendapatan + harga
+		}
+	}
+}
+
+func viewPelanggan(arr ArrPelanggan, nPelanggan int) {
+	for i:=0; i < nPelanggan; i++ {
+		fmt.Printf("Pelanggan ke-%d: %s\n",i+1,arr[i].nama)
 	}
 }
 
@@ -728,6 +997,7 @@ func menuUtama() {
 	fmt.Println("1. Edit Data")
 	fmt.Println("2. Transaksi")
 	fmt.Println("3. Lihat Data")
+	fmt.Println("4. Lihat Pendapatan")
 	fmt.Print("Pilihan: ")
 }
 
@@ -785,4 +1055,10 @@ func menuTransaksi() {
 	fmt.Println("1. Service motor")
 	fmt.Println("2. Beli Sparepart")
 	fmt.Print("Pilihan: ")
+}
+
+func cls() {
+	cmd := exec.Command("cmd", "/c", "cls")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }
